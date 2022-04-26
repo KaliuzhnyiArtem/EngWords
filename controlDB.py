@@ -12,23 +12,36 @@ class ControlDB:
                        )""")
             self.db.commit()
 
-    def authorization(self, username, password):
-        self.curs.execute(f"""SELECT id FROM client WHERE login='{username}' AND password='{password}'""")
+    def find_id_client(self, username, password=None):
 
-        if not self.curs.fetchall():
+        if password is None:
+            self.curs.execute(f"""SELECT id FROM client WHERE login='{username}'""")
+        else:
+            self.curs.execute(f"""SELECT id FROM client WHERE login='{username}' AND password='{password}'""")
+
+        id_client = self.curs.fetchall()
+        if not id_client:
+            return None
+        else:
+            return id_client[0][0]
+
+    def authorization(self, username, password):
+        if self.find_id_client(username, password) is None:
             print("Не допущен")
             return False
         else:
             print("Успешная авторизация")
             return True
 
-    def check_username(self, username):
-        self.curs.execute(f"""SELECT * FROM client WHERE login='{username}'""")
-
-        if self.curs.fetchall():
-            return False
+    def count_l_words(self, id_client):
+        self.curs.execute(f"""
+        SELECT count(id_word) FROM learned_words WHERE id_client={id_client} AND Id_lerned>2;
+        """)
+        amount = self.curs.fetchall()[0][0]
+        if amount:
+            return amount
         else:
-            return True
+            return 0
 
 
 

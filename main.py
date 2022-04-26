@@ -34,30 +34,44 @@ def close_db(error):
 @app.route('/', methods=["POST", "GET"])
 def index():
     if request.method == "POST":
+        username = request.form['username']
+        password = request.form['password']
 
         # Создание новго аканта
         if 'create_account' in request.form:
             cont_db = ControlDB(get_db())
-            if cont_db.check_username(request.form['username']):
-                cont_db.register_new_client(request.form['username'], request.form['password'])
-                print('create acount')
+            if cont_db.find_id_client(username) is None:
+                cont_db.register_new_client(username, password)
 
         # Вход в профиль
         elif 'enter' in request.form:
             cont_db = ControlDB(get_db())
-            access = cont_db.authorization(request.form['username'], request.form['password'])
+            access = cont_db.authorization(username, password)
             if access:
-                session['username'] = request.form['username']
-                session['password'] = request.form['password']
-                print('enter')
-                return redirect(url_for('info_page', username=request.form['username']),)
+                session['id_client'] = cont_db.find_id_client(username, password)
+                session['username'] = username
+                session['password'] = password
+                return redirect(url_for('info_page', username=username))
 
     return render_template('index.html')
 
 
-@app.route("/infopage/<username>")
+@app.route("/infopage/<username>", methods=["POST", "GET"])
 def info_page(username):
-    return render_template('infopage.html')
+
+    if request.method == "POST":
+        return 'test'
+
+    cont_db = ControlDB(get_db())
+    if session['id_client'] == cont_db.find_id_client(username):
+        return render_template('infopage.html', count_l_words=cont_db.count_l_words(session['id_client']))
+    else:
+        return redirect(url_for('index'))
+
+
+@app.route('/learnpage')
+def learn_words():
+    return render_template('learnpage.html')
 
 
 if __name__ == "__main__":

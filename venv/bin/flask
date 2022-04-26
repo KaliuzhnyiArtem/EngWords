@@ -1,4 +1,4 @@
-#!/Users/artem/Desktop/Python/project/EngWords/venv/bin/python3
+#!/Users/artem/Desktop/Python/EngWords/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
