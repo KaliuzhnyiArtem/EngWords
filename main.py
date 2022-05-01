@@ -48,30 +48,38 @@ def index():
             cont_db = ControlDB(get_db())
             access = cont_db.authorization(username, password)
             if access:
-                session['id_client'] = cont_db.find_id_client(username, password)
                 session['username'] = username
                 session['password'] = password
+                session['id_client'] = cont_db.find_id_client(username, password)
+                print(url_for('info_page', username=username))
                 return redirect(url_for('info_page', username=username))
 
     return render_template('index.html')
 
 
-@app.route("/infopage/<username>", methods=["POST", "GET"])
-def info_page(username):
-
-    if request.method == "POST":
-        return 'test'
+@app.route('/learnpage/<username>', methods=["POST", "GET"])
+def learn_words(username):
 
     cont_db = ControlDB(get_db())
     if session['id_client'] == cont_db.find_id_client(username):
-        return render_template('infopage.html', count_l_words=cont_db.count_l_words(session['id_client']))
+        return render_template('learnpage.html')
     else:
         return redirect(url_for('index'))
 
 
-@app.route('/learnpage')
-def learn_words():
-    return render_template('learnpage.html')
+@app.route("/infopage/<username>", methods=["GET", "POST"])
+def info_page(username):
+    cont_db = ControlDB(get_db())
+
+    if request.method == "POST":
+        if 'learb' in request.form:
+            cont_db.transfer_5_words(session['id_client'], cont_db.get_idlast_word())
+            return redirect(url_for('learn_words', username=username))
+
+    if session['id_client'] == cont_db.find_id_client(username):
+        return render_template('infopage.html', count_l_words=cont_db.count_l_words(session['id_client']))
+    else:
+        return redirect(url_for('index'))
 
 
 if __name__ == "__main__":
