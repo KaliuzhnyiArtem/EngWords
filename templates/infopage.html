@@ -13,9 +13,11 @@
             <p class="repetition">На повторение 0 слов</p>
             <form  action="{{url_for('info_page',username = session['username'])}}" method="post"  class="buttonstart">
                 
-                <input type="submit" name="learb" value="Выучить новые 5 слов" class="learnnew">
-               
-                <!-- <input type="submit" name="repetitionWords" value="Повторить выученные слова"> -->
+                {% if not repeat_words %}
+                    <input type="submit" name="learb" value="Выучить новые 5 слов" class="learnnew">
+                {% else %}
+                    <input type="submit" name="repetitionWords" value="Повторить выученные слова" class="repeat_b" >
+                {% endif %}
             </form>
         </div>
     </div>

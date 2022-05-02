@@ -161,6 +161,12 @@ select {
 	width: fit-content;
 }
 
+.repeat_b {
+	background: #0DA125;
+	color: white;
+	width: fit-content;
+}
+
 .prog{
 	height: 1%;
 	width: 50%;

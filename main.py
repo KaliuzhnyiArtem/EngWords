@@ -73,11 +73,13 @@ def info_page(username):
 
     if request.method == "POST":
         if 'learb' in request.form:
-            cont_db.transfer_5_words(session['id_client'], cont_db.get_idlast_word())
+            cont_db.transfer_5_words(session['id_client'])
             return redirect(url_for('learn_words', username=username))
 
     if session['id_client'] == cont_db.find_id_client(username):
-        return render_template('infopage.html', count_l_words=cont_db.count_l_words(session['id_client']))
+        return render_template('infopage.html',
+                               count_l_words=cont_db.count_l_words(session['id_client']),
+                               repeat_words=cont_db.check_repead_words(session['id_client']))
     else:
         return redirect(url_for('index'))
 

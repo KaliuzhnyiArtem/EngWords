@@ -1,4 +1,7 @@
 import time
+from learnlogic import difference_time
+
+
 class ControlDB:
     def __init__(self, db):
         self.db = db
@@ -35,6 +38,9 @@ class ControlDB:
             return True
 
     def count_l_words(self, id_client):
+        """
+        Підраховує кількість вивчених слів
+        """
         self.curs.execute(f"""
         SELECT count(id_word) FROM learned_words WHERE id_client={id_client} AND Id_lerned>2;
         """)
@@ -44,7 +50,12 @@ class ControlDB:
         else:
             return 0
 
-    def transfer_5_words(self, id_client, id_las_word):
+    def transfer_5_words(self, id_client):
+        """
+        Додае до таблиці вивчених слів нові 5 слів
+        """
+        id_las_word = self.__get_idlast_word(id_client)
+
         if id_las_word is None:
             id_las_word = 0
         start_time = time.time()
@@ -58,24 +69,52 @@ class ControlDB:
             """)
         self.db.commit()
 
-    def get_idlast_word(self, id_client=1):
-        self.curs.execute(f"""SELECT max(id_word) FROM learned_words WHERE id_client=1""")
+    def __get_idlast_word(self, id_client) -> int:
+        """
+        Повертає id останнього вивченого слова
+        """
+        self.curs.execute(f"""SELECT max(id_word) FROM learned_words WHERE id_client={id_client}""")
         id_word = self.curs.fetchall()[0][0]
         return id_word
 
-    #Dont used
-    def get_learned_words(self, id_client):
+    def __get_learned_words(self, id_client) -> list:
+        """
+        Повертає список вивчених слів
+        """
         self.curs.execute(f"""SELECT * FROM learned_words WHERE id_client={id_client}""")
-        return self.curs.fetchall()
+        ls = self.curs.fetchall()
+        return ls
 
-    def find_words_repetition(self, id_client):
-        time_now = time.time()
-        self.curs.execute(f"""
-        SELECT * FROM learned_words AS lw WHERE id_client={id_client} AND {time_now}-lw.start_time
-        """)
-        
-        
-    def check_learned_words(self):
-        # Проверка на время
-        # Плучить все выученые слова клиента
-        pass
+    def __get_status_dict(self) -> dict:
+        """
+        Повертає словарь
+        ключ - ід статуса
+        значенна - час до наступного повторення
+        """
+        self.curs.execute(f"""SELECT * FROM status_learning""")
+        st_learning = {}
+        for i in self.curs.fetchall():
+            st_learning[i[0]] = i[1]
+
+        return st_learning
+
+    #     # (1, 1, 1, 1651434922.661331)
+
+    def check_repead_words(self, id_client) -> list:
+        """
+        Повертає список слів які потрібно повторити
+        """
+        repead_words = []
+        learned_words = self.__get_learned_words(id_client)
+        st_learning = self.__get_status_dict()
+
+        if not learned_words:
+            return repead_words
+        else:
+            for i in learned_words:
+                if difference_time(i[3], st_learning.get(i[2])) >= 0:
+                    repead_words.append(i)
+
+        return repead_words
+
+
