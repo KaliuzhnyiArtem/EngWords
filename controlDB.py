@@ -5,10 +5,9 @@ from learnlogic import difference_time
 class ControlDB:
     def __init__(self, db):
         self.db = db
-
         self.curs = self.db.cursor()
 
-    def register_new_client(self, username, password):
+    def register_new_client(self, username: str, password: str):
         print("*")
         if username != '' and password != '':
             self.curs.execute(f"""INSERT INTO client (login, password) VALUES (
@@ -16,7 +15,7 @@ class ControlDB:
                        )""")
             self.db.commit()
 
-    def find_id_client(self, username, password=None):
+    def find_id_client(self, username: str, password=None) -> list or None:
 
         if password is None:
             self.curs.execute(f"""SELECT id FROM client WHERE login='{username}'""")
@@ -29,7 +28,7 @@ class ControlDB:
         else:
             return id_client[0][0]
 
-    def authorization(self, username, password):
+    def authorization(self, username: str, password: str) -> bool:
         if self.find_id_client(username, password) is None:
             print("Не допущен")
             return False
@@ -37,7 +36,7 @@ class ControlDB:
             print("Успешная авторизация")
             return True
 
-    def count_l_words(self, id_client):
+    def count_l_words(self, id_client: int) -> int:
         """
         Підраховує кількість вивчених слів
         """
@@ -50,7 +49,7 @@ class ControlDB:
         else:
             return 0
 
-    def transfer_5_words(self, id_client):
+    def transfer_5_words(self, id_client: int):
         """
         Додае до таблиці вивчених слів нові 5 слів
         """
@@ -69,7 +68,7 @@ class ControlDB:
             """)
         self.db.commit()
 
-    def __get_idlast_word(self, id_client) -> int:
+    def __get_idlast_word(self, id_client: int) -> int:
         """
         Повертає id останнього вивченого слова
         """
@@ -77,7 +76,7 @@ class ControlDB:
         id_word = self.curs.fetchall()[0][0]
         return id_word
 
-    def __get_learned_words(self, id_client) -> list:
+    def __get_learned_words(self, id_client: int) -> list:
         """
         Повертає список вивчених слів
         """
@@ -98,9 +97,7 @@ class ControlDB:
 
         return st_learning
 
-    #     # (1, 1, 1, 1651434922.661331)
-
-    def check_repead_words(self, id_client) -> list:
+    def check_repead_words(self, id_client: int) -> list:
         """
         Повертає список слів які потрібно повторити
         """
@@ -116,5 +113,31 @@ class ControlDB:
                     repead_words.append(i)
 
         return repead_words
+
+    def zeroing_status(self, id_client: int, id_words: int):
+        """
+        Обнуляє статус вивчення переданого слова в заданого клієнта
+        """
+        self.curs.execute(f"""
+        UPDATE learned_words SET id_lerned=1, start_time={time.time()}
+         WHERE id_client={id_client} AND id_word={id_words}""")
+        self.db.commit()
+
+    def lifting_status(self, id_client, id_words):
+        """
+        Піднімає статус вивченого слова на +1 в заданого клієнта
+        """
+        self.curs.execute(f"""
+        UPDATE learned_words SET id_lerned=id_lerned+1, start_time={time.time()}
+         WHERE id_client={id_client} AND id_word={id_words}""")
+        self.db.commit()
+
+    def get_date_word(self, id_word: int):
+        """
+        Повертає всю інформацію про задане слово
+        """
+        self.curs.execute(f"""SELECT * FROM words WHERE id={id_word}""")
+
+        return self.curs.fetchall()[0]
 
 

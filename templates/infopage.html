@@ -10,7 +10,7 @@
     <div class="infopage">
         <div class="infoconteiner">
             <p class="learned">Выучено {{count_l_words}} слов</p>
-            <p class="repetition">На повторение 0 слов</p>
+            <p class="repetition">На повторение {{count_repeat}} слов</p>
             <form  action="{{url_for('info_page',username = session['username'])}}" method="post"  class="buttonstart">
                 
                 {% if not repeat_words %}
