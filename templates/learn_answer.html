@@ -9,11 +9,9 @@
 <body>
 	<div class="index_page">
 	    <div class="conteiner">
-	        <progress value="1" max="{{ amount_words }}" class="prog"></progress>
 	        <p class="engwords">{{engword}}</p>
 	        <p class="transcription">{{trans}}</p>
 	        <p class="rusword">{{rus}}</p>
-	       
 	        <form action="{{url_for('learn_answer', username=session['username'])}}" method="post" class="frombat">
 	        	<input type="submit" name="repeat" value="Повторить" class="repeat">
 	        	<input type="submit" name="know" value="Знаю" class="know">

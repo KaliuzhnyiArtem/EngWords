@@ -60,7 +60,6 @@ def index():
                 session['username'] = username
                 session['password'] = password
                 session['id_client'] = cont_db.find_id_client(username, password)
-                print(url_for('info_page', username=username))
                 return redirect(url_for('info_page', username=username))
 
     return render_template('index.html')
@@ -78,17 +77,18 @@ def learn_answer(username):
                 return redirect(url_for('learn_words', username=username))
 
             elif 'know' in request.form:
-                cont_db.lifting_status(session['id_client'], session['id_word'])
+                if session['status_learn'] == 0:
+                    cont_db.lifting_status(session['id_client'], session['id_word'], step=2)
+                else:
+                    cont_db.lifting_status(session['id_client'], session['id_word'])
                 return redirect(url_for('learn_words', username=username))
 
         if session['status_learn'] == 2:
             return render_template('learn_answer.html', engword=session['rusword'],
-                                   trans=session['engword'], rus=session['trans'],
-                                   amount_words=session['amount_words'])
+                                   trans=session['engword'], rus=session['trans'])
         else:
             return render_template('learn_answer.html', engword=session['engword'],
-                                   trans=session['trans'], rus=session['rusword'],
-                                   amount_words=session['amount_words'])
+                                   trans=session['trans'], rus=session['rusword'])
     else:
         return redirect(url_for('index'))
 
@@ -100,11 +100,10 @@ def learn_words(username):
     # Перевірка доступу до данного url
     if session['id_client'] == cont_db.find_id_client(username):
         repead_words: list = cont_db.check_repead_words(session['id_client'])
-        session['amount_words'] = len(repead_words)
-        print(session['amount_words'])
 
         if not repead_words:
             return redirect(url_for('info_page', username=username))
+
         else:
             if request.method == 'POST':
                 if 'show_answer' in request.form:
@@ -116,11 +115,10 @@ def learn_words(username):
                             studying_word[3], studying_word[0], repead_words[0][2])
 
             if session['status_learn'] == 2:
-                return render_template('learnpage.html', engword=studying_word[2],
-                                       amount_words=session['amount_words'])
+                return render_template('learnpage.html', engword=studying_word[2])
             else:
                 return render_template('learnpage.html', engword=studying_word[1],
-                                       trans=studying_word[3], amount_words=session['amount_words'])
+                                       trans=studying_word[3])
     else:
         return redirect(url_for('index'))
 

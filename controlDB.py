@@ -119,16 +119,16 @@ class ControlDB:
         Обнуляє статус вивчення переданого слова в заданого клієнта
         """
         self.curs.execute(f"""
-        UPDATE learned_words SET id_lerned=1, start_time={time.time()}
+        UPDATE learned_words SET id_lerned=0, start_time={time.time()}
          WHERE id_client={id_client} AND id_word={id_words}""")
         self.db.commit()
 
-    def lifting_status(self, id_client, id_words):
+    def lifting_status(self, id_client, id_words, step=1):
         """
         Піднімає статус вивченого слова на +1 в заданого клієнта
         """
         self.curs.execute(f"""
-        UPDATE learned_words SET id_lerned=id_lerned+1, start_time={time.time()}
+        UPDATE learned_words SET id_lerned=id_lerned+{step}, start_time={time.time()}
          WHERE id_client={id_client} AND id_word={id_words}""")
         self.db.commit()
 
